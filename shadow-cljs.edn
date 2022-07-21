@@ -1,5 +1,7 @@
 {:source-paths ["src"]
- :dependencies [[reagent "1.0.0"]]
+ :dependencies [[reagent "1.0.0"]
+                [tick/tick "0.5.0"]
+                [testdouble/clojurescript.csv "0.5.1"]]
  :dev-http {8080 ["public/"
                   "target/public/"]}
  :builds {:dev {:target :browser
