@@ -31,6 +31,21 @@
       (.then (fn [text] (cljs.reader/read-string text)))
       (.then (fn [data] (reset! event-data data)))))
 
+
+(defn date-range [start end step]
+  ;; find first "midhnight" after start
+  (loop [dates (list start)]
+    (let [date (first dates)]
+     (if (< date end)
+       (recur (conj dates (t/>> date step)))
+       (reverse dates)))))
+
+#_(date-range (t/now)
+              (t/>> (t/now) (t/new-duration 10 :days))
+              (t/new-duration 1 :days))
+
+#_(t/>> (t/now) (t/new-duration 1 :days))
+
 (defn app-view []
   [:div
    [:button {:on-click (fn []
@@ -60,7 +75,8 @@
                           :fill color}])]
        [:div
         [:svg {:width width :height height}
-         (for [co2 [400 500 600 700 800 900 1000 1100 1200 1300 1400 1500]]
+         ;; y lines
+         (for [co2 (range 400 1500 100)]
            ^{:key co2}
            [:line {:title co2
                    :stroke "#00000033"
@@ -68,17 +84,20 @@
                    :x2 (->x (t/seconds (t/between start-date end-date)))
                    :y1 (->y co2)
                    :y2 (->y co2)}])
+         ;; color bands
          [band 0 420 "#00FF0044"]
          [band 1000 max-co2 "#FF000044"]
          [band 420 550 "#0000FF44"]
+         ;; events
          #_(for [[date label] @event-data]
-           ^{:key date}
-           [:line {:title label
-                   :stroke "black"
-                   :x1 (->x (t/seconds (t/between start-date date)))
-                   :x2 (->x (t/seconds (t/between start-date date)))
-                   :y1 (->y 0)
-                   :y2 (->y max-co2)}])
+            ^{:key date}
+            [:line {:title label
+                    :stroke "black"
+                    :x1 (->x (t/seconds (t/between start-date date)))
+                    :x2 (->x (t/seconds (t/between start-date date)))
+                    :y1 (->y 0)
+                    :y2 (->y max-co2)}])
+         ;; co2 line
          [:path {:stroke "black"
                  :fill "none"
                  :d (->> @co2-data
